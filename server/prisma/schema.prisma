@@ -15,6 +15,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   profile   Profile?
+  resumes   Resume[]
 }
 
 model Profile {
@@ -79,4 +80,17 @@ model Certification {
   credentialUrl String?
   profileId     String
   profile       Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Resume {
+  id        String   @id @default(uuid())
+  title     String
+  fileUrl   String
+  fileName  String
+  isActive  Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  analysis  Json?
 }
