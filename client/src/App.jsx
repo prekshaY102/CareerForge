@@ -1,22 +1,21 @@
-import Navbar from "./components/Navbar";
-import ProfileProgress from "./components/ProfileProgress";
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
 
-function App() {
+export default function App() {
   return (
-    <>
-      <Navbar appName="CareerForge" />
-
-      <main>
-        <h1>CareerForge</h1>
-
-        <p>Turn your skills into a career roadmap.</p>
-
-        <button>Get Started</button>
-
-        <ProfileProgress />
-      </main>
-    </>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
-
-export default App;
