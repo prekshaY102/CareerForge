@@ -86,4 +86,73 @@ async function deleteJobDescription(req, res) {
   }
 }
 
-module.exports = { createJobDescription, getJobDescriptions, getJobDescription, deleteJobDescription };
+async function analyzeMatch(req, res) {
+  try {
+    const jobDescription = await prisma.jobDescription.findUnique({ where: { id: req.params.id } });
+    if (!jobDescription || jobDescription.userId !== req.user.userId) {
+      return res.status(404).json({ error: 'Job description not found' });
+    }
+
+    const profile = await prisma.profile.findUnique({
+      where: { userId: req.user.userId },
+      include: { education: true, experience: true, projects: true, certifications: true },
+    });
+    if (!profile) {
+      return res.status(400).json({ error: 'Complete your profile before running a match analysis' });
+    }
+
+    const prompt = `Compare this candidate's profile against the job description. Respond with ONLY valid JSON, no markdown formatting:
+{
+  "overallMatch": number from 0-100,
+  "matchingSkills": ["..."],
+  "missingSkills": ["..."],
+  "relevantExperience": ["..."],
+  "missingKeywords": ["..."],
+  "recommendedImprovements": ["..."]
+}
+
+Candidate skills: ${profile.skills.join(', ')}
+Candidate experience: ${profile.experience.map(e => `${e.title} at ${e.company}: ${e.description || ''}`).join(' | ')}
+Candidate projects: ${profile.projects.map(p => `${p.title}: ${p.description || ''} (${p.techStack.join(', ')})`).join(' | ')}
+
+Job required skills: ${jobDescription.requiredSkills.join(', ')}
+Job preferred skills: ${jobDescription.preferredSkills.join(', ')}
+Job responsibilities: ${jobDescription.responsibilities.join(', ')}
+Full job text: ${jobDescription.rawText}`;
+
+    const response = await ai.models.generateContent({ model: 'gemini-flash-latest', contents: prompt });
+    const result = JSON.parse(response.text.replace(/```json|```/g, '').trim());
+
+    const analysis = await prisma.jobMatchAnalysis.create({
+      data: {
+        jobDescriptionId: jobDescription.id,
+        overallMatch: result.overallMatch || 0,
+        matchingSkills: result.matchingSkills || [],
+        missingSkills: result.missingSkills || [],
+        relevantExperience: result.relevantExperience || [],
+        missingKeywords: result.missingKeywords || [],
+        recommendedImprovements: result.recommendedImprovements || [],
+        userId: req.user.userId,
+      },
+    });
+    res.status(201).json(analysis);
+  } catch (error) {
+    console.error('Analyze match error:', error);
+    res.status(500).json({ error: 'Something went wrong analyzing the match' });
+  }
+}
+
+async function getMatchAnalyses(req, res) {
+  try {
+    const analyses = await prisma.jobMatchAnalysis.findMany({
+      where: { jobDescriptionId: req.params.id, userId: req.user.userId },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json(analyses);
+  } catch (error) {
+    console.error('Get match analyses error:', error);
+    res.status(500).json({ error: 'Something went wrong fetching analyses' });
+  }
+}
+
+module.exports = { createJobDescription, getJobDescriptions, getJobDescription, deleteJobDescription, analyzeMatch, getMatchAnalyses };

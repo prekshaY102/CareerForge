@@ -18,6 +18,8 @@ model User {
   resumes   Resume[]
   jobApplications   JobApplication[]
   jobDescriptions   JobDescription[]
+  jobMatchAnalyses    JobMatchAnalysis[]
+  interviewQuestions  InterviewQuestion[]
 }
 
 model Profile {
@@ -146,4 +148,34 @@ model JobDescription {
   userId                String
   user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt             DateTime @default(now())
+  jobMatchAnalyses    JobMatchAnalysis[]
+  interviewQuestions  InterviewQuestion[]
+}
+
+model JobMatchAnalysis {
+  id                      String         @id @default(uuid())
+  overallMatch            Int
+  matchingSkills          String[]
+  missingSkills           String[]
+  relevantExperience      String[]
+  missingKeywords         String[]
+  recommendedImprovements String[]
+  jobDescriptionId        String
+  jobDescription          JobDescription @relation(fields: [jobDescriptionId], references: [id], onDelete: Cascade)
+  userId                  String
+  user                    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt               DateTime       @default(now())
+}
+
+model InterviewQuestion {
+  id               String          @id @default(uuid())
+  category         String
+  question         String
+  userAnswer       String?
+  aiFeedback       String?
+  jobDescriptionId String?
+  jobDescription   JobDescription? @relation(fields: [jobDescriptionId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt        DateTime        @default(now())
 }
