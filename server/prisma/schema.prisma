@@ -16,6 +16,7 @@ model User {
   updatedAt DateTime @updatedAt
   profile   Profile?
   resumes   Resume[]
+  jobApplications   JobApplication[]
 }
 
 model Profile {
@@ -93,4 +94,38 @@ model Resume {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   analysis  Json?
+  jobApplications   JobApplication[]
+}
+
+enum ApplicationStatus {
+  SAVED
+  APPLIED
+  SCREENING
+  INTERVIEW
+  TECHNICAL_ROUND
+  HR_ROUND
+  OFFER
+  REJECTED
+  WITHDRAWN
+}
+
+model JobApplication {
+  id              String            @id @default(uuid())
+  company         String
+  jobTitle        String
+  jobUrl          String?
+  location        String?
+  jobType         String?
+  salary          String?
+  applicationDate DateTime?
+  status          ApplicationStatus @default(SAVED)
+  notes           String?
+  interviewDate   DateTime?
+  followUpDate    DateTime?
+  resumeId        String?
+  resume          Resume?           @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 }
