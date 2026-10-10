@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import { getProfile, updateProfile } from '../api/profile';
+import ProfileListSection from '../components/ProfileListSection';
+import {
+  getProfile, updateProfile,
+  addEducation, deleteEducation,
+  addExperience, deleteExperience,
+  addProject, deleteProject,
+  addCertification, deleteCertification,
+} from '../api/profile';
 
 export default function Profile() {
   const [profile, setProfile] = useState(null);
@@ -25,7 +32,8 @@ export default function Profile() {
     e.preventDefault();
     setSaving(true);
     const updated = await updateProfile({ ...form, skills: form.skills.split(',').map((s) => s.trim()).filter(Boolean) });
-    setProfile(updated);
+    // the PUT response doesn't include the nested lists, so merge rather than replace
+    setProfile({ ...updated, education: profile.education, experience: profile.experience, projects: profile.projects, certifications: profile.certifications });
     setSaving(false);
     setEditing(false);
   }
@@ -40,7 +48,7 @@ export default function Profile() {
       </div>
 
       {editing ? (
-        <form onSubmit={handleSave} className="border border-line rounded-sm p-6 bg-white max-w-2xl space-y-4">
+        <form onSubmit={handleSave} className="border border-line rounded-sm p-6 bg-white max-w-2xl space-y-4 mb-6">
           <div>
             <label className="block text-xs text-muted mb-1">Bio</label>
             <textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })}
@@ -82,7 +90,7 @@ export default function Profile() {
           </div>
         </form>
       ) : (
-        <div className="border border-line rounded-sm p-6 bg-white max-w-2xl">
+        <div className="border border-line rounded-sm p-6 bg-white max-w-2xl mb-6">
           <p className="text-ink mb-4">{profile.bio || <span className="text-muted">No bio yet.</span>}</p>
           {profile.targetRole && <p className="text-sm text-muted mb-3">Targeting: <span className="text-ink">{profile.targetRole}</span></p>}
           {profile.skills?.length > 0 && (
@@ -98,9 +106,86 @@ export default function Profile() {
         </div>
       )}
 
-      <div className="mt-8 border border-line rounded-sm p-6 bg-white max-w-2xl">
-        <p className="text-muted text-sm">Education, experience, projects, and certifications land here next.</p>
-      </div>
+      <ProfileListSection
+        title="Education"
+        items={profile.education || []}
+        fields={[
+          { name: 'institution', label: 'Institution', required: true },
+          { name: 'degree', label: 'Degree', required: true },
+          { name: 'fieldOfStudy', label: 'Field of study' },
+          { name: 'startDate', label: 'Start date', type: 'date', required: true },
+          { name: 'endDate', label: 'End date', type: 'date' },
+        ]}
+        renderItem={(item) => `${item.degree}${item.fieldOfStudy ? ' in ' + item.fieldOfStudy : ''} — ${item.institution} (${item.startDate?.slice(0, 4)}–${item.endDate ? item.endDate.slice(0, 4) : 'Present'})`}
+        onAdd={async (data) => {
+          const created = await addEducation(data);
+          setProfile((p) => ({ ...p, education: [...p.education, created] }));
+        }}
+        onDelete={async (id) => {
+          await deleteEducation(id);
+          setProfile((p) => ({ ...p, education: p.education.filter((e) => e.id !== id) }));
+        }}
+      />
+
+      <ProfileListSection
+        title="Experience"
+        items={profile.experience || []}
+        fields={[
+          { name: 'title', label: 'Title', required: true },
+          { name: 'company', label: 'Company', required: true },
+          { name: 'startDate', label: 'Start date', type: 'date', required: true },
+          { name: 'endDate', label: 'End date', type: 'date' },
+        ]}
+        renderItem={(item) => `${item.title} at ${item.company} (${item.startDate?.slice(0, 4)}–${item.endDate ? item.endDate.slice(0, 4) : 'Present'})`}
+        onAdd={async (data) => {
+          const created = await addExperience(data);
+          setProfile((p) => ({ ...p, experience: [...p.experience, created] }));
+        }}
+        onDelete={async (id) => {
+          await deleteExperience(id);
+          setProfile((p) => ({ ...p, experience: p.experience.filter((e) => e.id !== id) }));
+        }}
+      />
+
+      <ProfileListSection
+        title="Projects"
+        items={profile.projects || []}
+        fields={[
+          { name: 'title', label: 'Title', required: true },
+          { name: 'description', label: 'Description' },
+          { name: 'techStack', label: 'Tech stack (comma-separated)' },
+          { name: 'githubUrl', label: 'GitHub URL' },
+        ]}
+        renderItem={(item) => `${item.title}${item.description ? ' — ' + item.description : ''}`}
+        onAdd={async (data) => {
+          const created = await addProject({ ...data, techStack: data.techStack ? data.techStack.split(',').map((s) => s.trim()).filter(Boolean) : [] });
+          setProfile((p) => ({ ...p, projects: [...p.projects, created] }));
+        }}
+        onDelete={async (id) => {
+          await deleteProject(id);
+          setProfile((p) => ({ ...p, projects: p.projects.filter((pr) => pr.id !== id) }));
+        }}
+      />
+
+      <ProfileListSection
+        title="Certifications"
+        items={profile.certifications || []}
+        fields={[
+          { name: 'name', label: 'Name', required: true },
+          { name: 'issuer', label: 'Issuer', required: true },
+          { name: 'issueDate', label: 'Issue date', type: 'date', required: true },
+          { name: 'credentialUrl', label: 'Credential URL' },
+        ]}
+        renderItem={(item) => `${item.name} — ${item.issuer} (${item.issueDate?.slice(0, 4)})`}
+        onAdd={async (data) => {
+          const created = await addCertification(data);
+          setProfile((p) => ({ ...p, certifications: [...p.certifications, created] }));
+        }}
+        onDelete={async (id) => {
+          await deleteCertification(id);
+          setProfile((p) => ({ ...p, certifications: p.certifications.filter((c) => c.id !== id) }));
+        }}
+      />
     </Layout>
   );
 }
