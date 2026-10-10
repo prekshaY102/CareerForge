@@ -17,6 +17,7 @@ model User {
   profile   Profile?
   resumes   Resume[]
   jobApplications   JobApplication[]
+  jobDescriptions   JobDescription[]
 }
 
 model Profile {
@@ -128,4 +129,21 @@ model JobApplication {
   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
+}
+
+model JobDescription {
+  id                    String   @id @default(uuid())
+  companyName           String?
+  jobTitle              String?
+  rawText               String
+  requiredSkills        String[]
+  preferredSkills       String[]
+  experienceRequired    String?
+  responsibilities      String[]
+  technologies          String[]
+  keywords              String[]
+  educationRequirements String?
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt             DateTime @default(now())
 }
