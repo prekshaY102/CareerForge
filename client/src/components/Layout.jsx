@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 const links = [
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/profile', label: 'Profile' },
+  { to: '/resumes', label: 'Resumes' },
+  { to: '/applications', label: 'Applications' },
 ];
 
 export default function Layout({ children }) {
