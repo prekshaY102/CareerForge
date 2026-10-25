@@ -6,6 +6,8 @@ const links = [
   { to: '/profile', label: 'Profile' },
   { to: '/resumes', label: 'Resumes' },
   { to: '/applications', label: 'Applications' },
+  { to: '/job-descriptions', label: 'Job descriptions' },
+  { to: '/interview', label: 'Interview prep' },
 ];
 
 export default function Layout({ children }) {
@@ -14,10 +16,10 @@ export default function Layout({ children }) {
 
   return (
     <div className="min-h-screen bg-paper">
-      <nav className="border-b border-line bg-white px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-8">
+      <nav className="border-b border-line bg-white px-6 py-4 flex flex-wrap items-center justify-between gap-y-3">
+        <div className="flex flex-wrap items-center gap-x-8 gap-y-2">
           <span className="font-semibold text-ink">CareerForge</span>
-          <div className="flex gap-5">
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
             {links.map((link) => (
               <Link
                 key={link.to} to={link.to}
