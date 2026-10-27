@@ -7,7 +7,7 @@ app.use(express.json());
 app.get("/api/v1/health", (req, res) => {
   res.json({
     success: true,
-    message: "CareerForge API is running",
+    message: "StepWise API is running",
   });
 });
 

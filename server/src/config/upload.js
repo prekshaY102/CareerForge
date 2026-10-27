@@ -14,7 +14,7 @@ const storage = new CloudinaryStorage({
     const isPdf = file.mimetype === 'application/pdf';
     const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
     return {
-      folder: 'careerforge-resumes',
+      folder: 'stepwise-resumes',
       resource_type: 'auto',
       // Word files are stored as raw files, which only keep their extension if it's in the public_id
       ...(isPdf ? {} : { public_id: `${Date.now()}-${safeName}` }),

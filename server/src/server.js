@@ -31,7 +31,7 @@ const apiLimiter = rateLimit({
 app.use('/api', apiLimiter);
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'CareerForge API is running' });
+  res.json({ status: 'ok', message: 'StepWise API is running' });
 });
 
 app.use('/api/auth', authRoutes);
