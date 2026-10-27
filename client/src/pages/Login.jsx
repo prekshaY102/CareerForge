@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { APP_NAME } from '../config';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -23,7 +24,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-paper px-4">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-semibold text-ink mb-1">StepWise</h1>
+        <h1 className="text-2xl font-semibold text-ink mb-1">{APP_NAME}</h1>
         <p className="text-muted text-sm mb-8">Log in to keep building your pipeline.</p>
         <form onSubmit={handleSubmit} className="border border-line rounded-sm p-6 bg-white">
           {error && <p className="text-sm text-red-700 mb-4">{error}</p>}
