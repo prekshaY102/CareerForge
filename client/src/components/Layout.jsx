@@ -18,7 +18,7 @@ export default function Layout({ children }) {
     <div className="min-h-screen bg-paper">
       <nav className="border-b border-line bg-white px-6 py-4 flex flex-wrap items-center justify-between gap-y-3">
         <div className="flex flex-wrap items-center gap-x-8 gap-y-2">
-          <span className="font-semibold text-ink">CareerForge</span>
+          <span className="font-semibold text-ink">StepWise</span>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
             {links.map((link) => (
               <Link
